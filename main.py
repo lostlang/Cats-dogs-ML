@@ -116,15 +116,16 @@ def normalize_train_data_and_generate_new_sample(tags_and_amount, need_sample, n
                 if i < len(file_list) and fnmatch.fnmatch(file_list[i].split(".")[0], f'*_{image_info[0]}'):
                     image_name = "/".join([dir_dataset, dir_train, tag, file_list[i]])
                     new_date = new_image(image_name, new_dir, need_image_size, 8, image_info[2:])
-                    for i2 in new_date:
-                        print((i2[0]-i2[2]) * (i2[1]-i2[3]), i2)
+                    with open(new_dir + f"{dir_normalize}.txt", "a") as file:
+                        for data in new_date:
+                            file.write(f"{image_info[1] - 1} ")
+                            file.write(" ".join([str(round(d / need_image_size, 3)) for d in data]))
+                            file.write("\n")
                     i += 1
-                    break
-            break
 
 
 def new_image(old_name, path_to_new, new_size, amount, info):
-    angle = random.randint(5, 10)
+    angle = random.randint(2, 6)
     image = Image.open(old_name)
 
     bw = Image.new("L", (new_size, new_size))
@@ -191,18 +192,16 @@ def new_image(old_name, path_to_new, new_size, amount, info):
 
 def rotate_rectangle(rectangle, angle, center):
     all_point = numpy.array([
-        [rectangle[0] - center, rectangle[0] - center],
+        [rectangle[0] - center, rectangle[1] - center],
         [rectangle[0] - center, rectangle[3] - center],
-        [rectangle[2] - center, rectangle[0] - center],
+        [rectangle[2] - center, rectangle[1] - center],
         [rectangle[2] - center, rectangle[3] - center]
     ])
-
     angle *= math.pi / 180
     rotate_array = numpy.array([
         [math.cos(angle), -math.sin(angle)],
         [math.sin(angle), math.cos(angle)]
     ])
-
     rotate_point = numpy.dot(all_point, rotate_array)
     rotate_point += center
     new_rectangle = [
@@ -232,5 +231,3 @@ if __name__ == "__main__":
     tag_sample = max(animal_amount.values())
 
     normalize_train_data_and_generate_new_sample(animal_amount, tag_sample,  200)
-
-
